@@ -37,6 +37,16 @@ print hop.table(cells, headers)
 print hop.table(cells, headers, {'id':'table_with_fixed_colnr'}, 2)
 print hop.table(cells, headers, {'id':'another_table_with_fixed_colnr'}, 5)
 
+print '\nList object tests:'
+listContent = [
+    'Cow',
+    ('Chicken', {'class':'bird'}),
+    'Lion',
+    ('Pidgeon', {'class':'bird'}),
+]
+print hop.list(listContent)
+print hop.list(listContent, 'ol')
+
 print '\nForm object tests:'
 print hop.beginForm('do.cgi')
 print hop.input({'type':'hidden', 'name':'id', 'value':'4'})

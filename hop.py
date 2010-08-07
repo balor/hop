@@ -114,8 +114,25 @@ class HOP(object):
         outputHtml += '\n'+self.buildHtmlObjectClosing('table')
         return outputHtml
 
-    def list(list=list(), type='ul'):
-        pass
+    def list(self, items=list(), listType='ul', options=dict()):
+        ''' Item param can be string or list with tuples/lists looking like this:
+            [(item1_body, item1_options),(item2_body, item2_options)]'''
+
+        outputHtml = self.buildHtmlObjectOpening(listType, options)
+        for item in items:
+            body = '&nbsp;'
+            options = dict()
+            if type(item) == list or type(item) == tuple:
+                item_len = len(item)
+                if item_len > 0:
+                    body = item[0]
+                if item_len > 1:
+                    options = item[1]
+            elif str(item).strip() != '':
+                body = str(item)
+            outputHtml += '\n\t'+self.buildHtmlObject('li', body, options)
+        outputHtml += '\n'+self.buildHtmlObjectClosing(listType)
+        return outputHtml
 
 
     def input(self, options=dict()):
@@ -134,13 +151,13 @@ class HOP(object):
         </select>
         '''
 
-        inputHtml = ''
+        outputHtml = ''
         if options.has_key('label'):
             if options.has_key('id'):
-                inputHtml += self.buildHtmlObject('label',
+                outputHtml += self.buildHtmlObject('label',
                     options['label'], {'for':options['id']})
             else:
-                inputHtml += self.buildHtmlObject('label', options['label'])
+                outputHtml += self.buildHtmlObject('label', options['label'])
             options.pop('label');
 
         if options.has_key('textarea') and options['textarea']:
@@ -149,18 +166,18 @@ class HOP(object):
             if options.has_key('body'):
                 body = options['body']
                 options.pop('body')
-            inputHtml += self.buildHtmlObject('textarea', body, options)
+            outputHtml += self.buildHtmlObject('textarea', body, options)
         else:
             if options.has_key('body'):
                 options.pop('body')
             if options.has_key('type') and options['type']=='hidden':
-                inputHtml += self.buildHtmlObject('div',
+                outputHtml += self.buildHtmlObject('div',
                     self.buildHtmlSelfClosingObject('input', options),
                     {'style':'display:none;'})
             else:
-                inputHtml += self.buildHtmlSelfClosingObject('input', options)
+                outputHtml += self.buildHtmlSelfClosingObject('input', options)
 
-        return inputHtml
+        return outputHtml
 
     def beginForm(self, action, options=dict(), method='post', charset='utf-8'):
         if not action:
@@ -175,7 +192,7 @@ class HOP(object):
     def endForm(self):
         return self.buildHtmlObjectClosing('form')
 
-    def autoForm(self, action, fields=list(), options=dict(), method='post', uploadForm=False):
+    def autoForm(self, action, fields=[], options=dict(), method='post', uploadForm=False):
         ''' special options:
                 'div':False - disable wrapping inputs in divs
         '''
