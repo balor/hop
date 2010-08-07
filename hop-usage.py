@@ -48,8 +48,15 @@ print hop.list(listContent)
 print hop.list(listContent, 'ol')
 
 print '\nForm object tests:'
+selectItems = [
+    {'body':'apple'},
+    {'body':'banana', 'value':'custom'},
+    {'body':'pineapple', 'class':'indent'},
+    {'body':'grapefruit'},
+]
 print hop.beginForm('do.cgi')
 print hop.input({'type':'hidden', 'name':'id', 'value':'4'})
+print hop.input({'select':True, 'items':selectItems})
 print hop.input({'type':'submit', 'value':'Delete'})
 print hop.endForm()
 
@@ -58,6 +65,7 @@ print hop.autoForm('logme.php', (
     {'type':'text', 'name':'username'},
     {'type':'text', 'name':'pass'},
     {'textarea':True, 'body':'pass custom text here'},
+    {'select':True, 'items':selectItems, 'class':'nice_select', 'id':'fruits'},
     {'type':'hidden', 'name':'spy', 'value':'im so secret!'},
     {'type':'submit', 'value':'Log in'}
 ), {'id':'myCleanForm'})

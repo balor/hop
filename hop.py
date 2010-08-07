@@ -137,20 +137,17 @@ class HOP(object):
 
     def input(self, options=dict()):
         ''' special options:
-                'textarea':True - trigger input to textarea
-                'select':True - trigger input to select
                 'label':'Label' - creates a label for input
-        '''
 
-        '''
-        TODO: implement select object
-        <select name="data[User][business_type]" id="UserBusinessType">
-            <option value=""></option>
-            <option value="0">Firma</option>
-            <option value="1" selected="selected">Osoba fizyczna</option>
-        </select>
-        '''
+                'textarea':True - trigger input to textarea
+                'body':str - for textarea only, textarea body'
 
+                'select':True - trigger input to select
+                'tabsize':int - for select only, increase the indent
+                'items':list - fot select only, list of select options, example:
+                    [{'body':'opt1','value':'val1'},{'body':'opt2,'value':'val2'}]
+        '''
+        options=dict(options)
         outputHtml = ''
         if options.has_key('label'):
             if options.has_key('id'):
@@ -167,6 +164,31 @@ class HOP(object):
                 body = options['body']
                 options.pop('body')
             outputHtml += self.buildHtmlObject('textarea', body, options)
+        elif options.has_key('select') and options['select']:
+            options.pop('select')
+            items = False
+            tabs = ''
+            if options.has_key('items'):
+                items = options['items']
+                options.pop('items')
+            if options.has_key('tabsize'):
+                tabs = options['tabsize'] * '\t'
+                options.pop('tabsize')
+            outputHtml += self.buildHtmlObjectOpening('select', options)
+            if items:
+                itemNr = 0
+                for item in items:
+                    if type(item) == dict:
+                        item = dict(item)
+                        body = itemNr
+                        if item.has_key('body'):
+                            body = str(item['body'])
+                            item.pop('body')
+                        if not item.has_key('value'):
+                            item['value'] = body 
+                        outputHtml += '\n\t' + tabs + self.buildHtmlObject('option', body, item)
+                        itemNr += 1
+            outputHtml += '\n' + tabs + self.buildHtmlObjectClosing('select')
         else:
             if options.has_key('body'):
                 options.pop('body')
@@ -208,6 +230,8 @@ class HOP(object):
 
         for field in fields:
             formHtml += '\t'
+            if field.has_key('select') and field['select']:
+                field['tabsize'] = 1
             if wrapInputWithDiv:
                 formHtml += self.buildHtmlObject('div',
                     self.input(field), {'class':'input'})

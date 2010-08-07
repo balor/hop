@@ -20,7 +20,7 @@ Features:
         style link, 
         meta charset, 
         form opening and closing,
-        form input fields,
+        form input fields (text, hidden, textarea, select etc..),
 
 Todo:
-    - 'select' object in HOP.input method
+    - think what's todo...
