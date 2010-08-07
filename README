@@ -10,17 +10,17 @@ The one thing that was missing and I couldn't find it was some html object print
 Features:
     - autoForm mothod for easy form creation
     - methods for custom html objects creation
-    - methods for simplifying creation of most troublesome tags: 
-        a, 
-        img, 
+    - methods for simplifying creation of most troublesome html objects: 
+        links, 
+        images, 
+        lists,
+        tables,
         script, 
+        title, 
         style link, 
         meta charset, 
-        title, 
-        input (different types and textarea, select to be done),
-        form beginning and ending
+        form opening and closing,
+        form input fields,
 
 Todo:
     - 'select' object in HOP.input method
-    - table printer
-    - list (ul,ol) printer
