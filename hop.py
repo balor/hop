@@ -71,6 +71,53 @@ class HOP(object):
             title = self.websitePath
         return self.buildHtmlObject('title', title)
 
+    def table(self, cells=list(), headers=None, options=dict(), fixedColumnsNum=None):
+        if len(cells) < 1 or type(cells[0]) != list or len(cells[0]) < 1:
+            return self.buildHtmlObject('table')
+        outputHtml = self.buildHtmlObjectOpening('table', options)
+        if headers:
+            columns = len(headers)
+            outputHtml += '\n\t'+self.buildHtmlObjectOpening('tr')
+            if fixedColumnsNum:
+                headers_len = len(headers)
+                for header in range(0, fixedColumnsNum):
+                    if header < headers_len:
+                        content = str(headers[header])
+                    else:
+                        content = '&nbsp;'
+
+                    outputHtml += self.buildHtmlObject('th', content)
+            else:
+                for header in headers:
+                    outputHtml += self.buildHtmlObject('th', str(header))
+            outputHtml += self.buildHtmlObjectClosing('tr')
+
+        if fixedColumnsNum:
+            for row in cells:
+                outputHtml += '\n\t'+self.buildHtmlObjectOpening('tr')
+                row_len = len(row)
+                for column in range(0, fixedColumnsNum):
+                    if column < row_len:
+                        content = str(row[column])
+                    else:
+                        content = '&nbsp;'
+
+                    outputHtml += self.buildHtmlObject('td', content)
+                outputHtml += self.buildHtmlObjectClosing('tr')
+        else:
+            for row in cells:
+                outputHtml += '\n\t'+self.buildHtmlObjectOpening('tr')
+                for column in row:
+                    outputHtml += self.buildHtmlObject('td', str(column))
+                outputHtml += self.buildHtmlObjectClosing('tr')
+
+        outputHtml += '\n'+self.buildHtmlObjectClosing('table')
+        return outputHtml
+
+    def list(list=list(), type='ul'):
+        pass
+
+
     def input(self, options=dict()):
         ''' special options:
                 'textarea':True - trigger input to textarea

@@ -26,12 +26,22 @@ print hop.img('balor.pl/logo.png', "Logo balor.pl")
 print hop.img('balor.pl/logo.png', "Logo balor.pl",
     {'style':'color:red;font-weight:bold', 'onclick':'showTitle();end();'})
 
+print '\nTable generation tests:'
+headers = ['Animals', 'Fruits', 'Operating Systems']
+cells = [
+    ['Leopard', 'Apple', 'Mac Os X'],
+    ['Penguin', 'Lemon', 'GNU/Linux'],
+    ['Cow', 'Potato', 'Windows'],
+]
+print hop.table(cells, headers)
+print hop.table(cells, headers, {'id':'table_with_fixed_colnr'}, 2)
+print hop.table(cells, headers, {'id':'another_table_with_fixed_colnr'}, 5)
+
 print '\nForm object tests:'
 print hop.beginForm('do.cgi')
 print hop.input({'type':'hidden', 'name':'id', 'value':'4'})
 print hop.input({'type':'submit', 'value':'Delete'})
 print hop.endForm()
-
 
 print '\nAutoForm tests:'
 print hop.autoForm('logme.php', (
