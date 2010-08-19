@@ -4,29 +4,30 @@ import hop
 
 from hop import HOP
 
+# hop object creation for site http://hop.com
 hop = HOP('http://hop.com/')
 
-print '\nDifferent tags tests:'
+# Some head tags
 print hop.title()
 print hop.title('Html object helper')
 print hop.style('main.css')
 print hop.script('jquery.js')
 print hop.metaCharset()
 
-print '\nA-tag tests:'
+# A-tag
 print hop.a('balor.pl')
 print hop.a('skype:balor')
 print hop.a('https://balor.pl/index.php', 'Moja strona domowa!')
 print hop.a('https://balor.pl/index.php', 'Moja strona domowa!', 'Wiesz ze mnie chcesz',
     {'style':'color:red;font-weight:bold', 'onclick':'showTitle();end();'})
 
-print '\nImg-tag tests:'
+# IMG-tag
 print hop.img('balor.pl/logo.png')
 print hop.img('balor.pl/logo.png', "Logo balor.pl")
 print hop.img('balor.pl/logo.png', "Logo balor.pl",
     {'style':'color:red;font-weight:bold', 'onclick':'showTitle();end();'})
 
-print '\nTable generation tests:'
+# tables
 headers = ['Animals', 'Fruits', 'Operating Systems']
 cells = [
     ['Leopard', 'Apple', 'Mac Os X'],
@@ -37,7 +38,7 @@ print hop.table(cells, headers)
 print hop.table(cells, headers, {'id':'table_with_fixed_colnr'}, 2)
 print hop.table(cells, headers, {'id':'another_table_with_fixed_colnr'}, 5)
 
-print '\nList object tests:'
+# lists
 listContent = [
     'Cow',
     ('Chicken', {'class':'bird'}),
@@ -47,7 +48,7 @@ listContent = [
 print hop.list(listContent)
 print hop.list(listContent, 'ol')
 
-print '\nForm object tests:'
+# forms objects
 selectItems = [
     {'body':'apple'},
     {'body':'banana', 'value':'custom'},
@@ -60,7 +61,7 @@ print hop.input({'select':True, 'items':selectItems})
 print hop.input({'type':'submit', 'value':'Delete'})
 print hop.endForm()
 
-print '\nAutoForm tests:'
+# automatic forms
 print hop.autoForm('logme.php', (
     {'type':'text', 'name':'username'},
     {'type':'text', 'name':'pass'},

@@ -2,6 +2,8 @@
 
 # Html Object Helper - HOP
 
+__author__ = 'Michał Thoma'
+
 class HOP(object):
     websitePath = ''
 
@@ -61,7 +63,7 @@ class HOP(object):
 
     def metaCharset(self, charset='utf8'):
         options = {
-            'content':'text/html; charset=utf-8',
+            'content':'text/html; charset=%s' % charset,
             'http-equiv':'Content-Type',
         }
         return self.buildHtmlSelfClosingObject('meta', options)
@@ -271,7 +273,7 @@ class HOP(object):
         for (name,value) in options.items():
             name = self._prepareString(name)
             value = self._prepareString(value)
-            optionsString += ' '+name+'="'+value+'"'
+            optionsString += ' %s="%s"' % (name, value)
 
         return optionsString
 
