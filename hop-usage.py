@@ -27,6 +27,9 @@ print hop.img('balor.pl/logo.png', "Logo balor.pl")
 print hop.img('balor.pl/logo.png', "Logo balor.pl",
     {'style':'color:red;font-weight:bold', 'onclick':'showTitle();end();'})
 
+# comment
+print hop.comment('You don\'t see me! Oh, you do..')
+
 # tables
 headers = ['Animals', 'Fruits', 'Operating Systems']
 cells = [

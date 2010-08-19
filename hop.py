@@ -73,6 +73,9 @@ class HOP(object):
             title = self.websitePath
         return self.buildHtmlObject('title', title)
 
+    def comment(self, comment):
+        return '<!-- %s -->' % comment
+
     def table(self, cells=list(), headers=None, options=dict(), fixedColumnsNum=None):
         if len(cells) < 1 or type(cells[0]) != list or len(cells[0]) < 1:
             return self.buildHtmlObject('table')

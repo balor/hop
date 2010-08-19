@@ -19,6 +19,7 @@ Features:
         title, 
         style link, 
         meta charset, 
+        html comment,
         form opening and closing,
         form input fields (text, hidden, textarea, select etc..),
 
