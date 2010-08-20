@@ -18,14 +18,12 @@ print hop.metaCharset()
 print hop.a('balor.pl')
 print hop.a('skype:balor')
 print hop.a('https://balor.pl/index.php', 'Moja strona domowa!')
-print hop.a('https://balor.pl/index.php', 'Moja strona domowa!', 'Wiesz ze mnie chcesz',
-    {'style':'color:red;font-weight:bold', 'onclick':'showTitle();end();'})
+print hop.a('https://balor.pl/index.php', 'Moja strona domowa!', 'Wiesz ze mnie chcesz', style='color:red;font-weight:bold', onclick='showTitle();end();')
 
 # IMG-tag
 print hop.img('balor.pl/logo.png')
 print hop.img('balor.pl/logo.png', "Logo balor.pl")
-print hop.img('balor.pl/logo.png', "Logo balor.pl",
-    {'style':'color:red;font-weight:bold', 'onclick':'showTitle();end();'})
+print hop.img('balor.pl/logo.png', "Logo balor.pl", style='color:red;font-weight:bold', onclick='showTitle();end();')
 
 # comment
 print hop.comment('You don\'t see me! Oh, you do..')
@@ -38,8 +36,8 @@ cells = [
     ['Cow', 'Potato', 'Windows'],
 ]
 print hop.table(cells, headers)
-print hop.table(cells, headers, {'id':'table_with_fixed_colnr'}, 2)
-print hop.table(cells, headers, {'id':'another_table_with_fixed_colnr'}, 5)
+print hop.table(cells, headers, id='table_with_fixed_colnr', fixedColumnsNum=2)
+print hop.table(cells, headers, id='another_table_with_fixed_colnr', fixedColumnsNum=5)
 
 # lists
 listContent = [
@@ -59,9 +57,9 @@ selectItems = [
     {'body':'grapefruit'},
 ]
 print hop.beginForm('do.cgi')
-print hop.input({'type':'hidden', 'name':'id', 'value':'4'})
-print hop.input({'select':True, 'items':selectItems})
-print hop.input({'type':'submit', 'value':'Delete'})
+print hop.input(type='hidden', name='id', value='4')
+print hop.input(select=True, items=selectItems)
+print hop.input(type='submit', value='Delete')
 print hop.endForm()
 
 # automatic forms
