@@ -70,4 +70,4 @@ print hop.autoForm('logme.php', (
     {'select':True, 'items':selectItems, 'class':'nice_select', 'id':'fruits'},
     {'type':'hidden', 'name':'spy', 'value':'im so secret!'},
     {'type':'submit', 'value':'Log in'}
-), {'id':'myCleanForm'})
+), id='myCleanForm')
