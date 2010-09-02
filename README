@@ -5,7 +5,7 @@ Author: Michał [balor] Thoma - http://balor.pl
 HOP - a small helper class for creating html objects souch a hyperlinks, images or forms.
 
 I've created it while rewriting some webpage from PHP (dead-simple inline scripts) to Python (Bottle + SqlAlchemy). 
-The one thing that was missing and I couldn't find it was some html object printer to be used in views. I was using such a thing in some project using advanced frameworks with embedded html helpers and I remember them being helpful. So i decided to create a small helper class, with no dependencies, not related to any framework, KISS'ish etc. Perfect to use with any simple web-framework like bottle or fpyf.
+The one thing that I've missed was some html object printer to be used in views. So i decided to create a small helper class, with no dependencies, not related to any framework, KISS'ish etc. Perfect to use with any simple web-framework like bottle or fpyf.
 
 Features:
     - autoForm mothod for easy form creation
@@ -24,4 +24,4 @@ Features:
         form input fields (text, hidden, textarea, select etc..),
 
 Todo:
-    - think what's todo...
+    - doc ?
