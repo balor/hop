@@ -8,7 +8,7 @@ I've created it while rewriting some webpage from PHP (dead-simple inline script
 The one thing that I've missed was some html object printer to be used in views. So i decided to create a small helper class, with no dependencies, not related to any framework, KISS'ish etc. Perfect to use with any simple web-framework like bottle or fpyf.
 
 Features:
-    - autoForm mothod for easy form creation
+    - auto_form mothod for easy form creation
     - methods for custom html objects creation
     - methods for simplifying creation of most troublesome html objects: 
         links, 
@@ -24,4 +24,5 @@ Features:
         form input fields (text, hidden, textarea, select etc..),
 
 Todo:
+    - tests!
     - doc ?

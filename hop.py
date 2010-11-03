@@ -1,125 +1,160 @@
 # -*- coding: utf-8 -*-
+'''
+HTML Object Helper - HOP
+Helper for rendering html objects easely
 
-# Html Object Helper - HOP
+Author: Michał Thoma
+Authors website: http://balor.pl
+'''
 
-__author__ = 'Michał Thoma'
+__author__ = u'Michał Thoma'
 
 class HOP(object):
-    websitePath = ''
+    website_path = ''
+    form_fields_num = 0
 
-    def __init__(self, websitePath='http://localhost/'):
-        # TODO: validate the websitePath
-        self.websitePath = websitePath
+    def __init__(self, website_path=None, website_name=None):
+        self.website_path = website_path
+        self.website_name = website_name
 
     def a(self, href, body=None, title=None, **params):
         if params.has_key('validate') and params['validate'] == False:
             href = href
             params.pop('validate')
         else:
-            href = self._urlValidation(href, True)
+            href = self._url_validation(href, True)
             if params.has_key('validate'):
                 params.pop('validate')
 
         if not body:
             body = href
-        if not title and not body:
+        if not title:
             title = href
-        elif not title and body:
-            title = body
 
         params['href'] = href
         params['title'] = title
 
-        return self.buildHtmlObject('a', body, **params);
+        return self.build_html_object('a', body, **params)
+
+    def email(self, email, body=None, title=None, **params):
+        href = 'mailto:%s' % email
+        return self.a(href, body, title, **params)
 
     def img(self, src, alt=None, **params):
         params['src'] = src
         if alt:
             params['alt'] = alt
+        elif self.website_name:
+            params['alt'] = self.website_name
         else:
-            params['alt'] = self.websitePath
-        return self.buildHtmlSelfClosingObject('img', **params)
+            params['alt'] = ''
+        return self.build_html_self_closing_object('img', **params)
 
     def style(self, href):
-        href = self._urlValidation(href)
+        href = self._url_validation(href)
         params = {
             'href':href,
             'rel':'stylesheet',
             'type':'text/css',
         }
-        return self.buildHtmlSelfClosingObject('link', **params)
+        return self.build_html_self_closing_object('link', **params)
 
     def script(self, src):
         params = {
-            'src':self._urlValidation(src),
+            'src':self._url_validation(src),
             'type':'text/javascript',
         }
-        return self.buildHtmlObject('script', '', **params)
+        return self.build_html_object('script', '', **params)
 
-    def metaCharset(self, charset='utf8'):
+    def meta_charset(self, charset='utf8'):
         params = {
             'content':'text/html; charset=%s' % charset,
             'http-equiv':'Content-Type',
         }
-        return self.buildHtmlSelfClosingObject('meta', **params)
+        return self.build_html_self_closing_object('meta', **params)
 
     def title(self, title=None):
         if not title:
-            title = self.websitePath
-        return self.buildHtmlObject('title', title)
+            if self.website_name:
+                title = self.website_name
+            elif self.website_path:
+                title = self.website_path
+            else:
+                title = 'My Homepage'
+        return self.build_html_object('title', title)
 
     def comment(self, comment):
         return '<!-- %s -->' % comment
 
     def table(self, cells=list(), headers=None, **params):
         if len(cells) < 1 or type(cells[0]) != list or len(cells[0]) < 1:
-            return self.buildHtmlObject('table')
-        outputHtml = self.buildHtmlObjectOpening('table', **params)
-        fixedColumnsNum = params.get('fixedColumnsNum', False)
+            return self.build_html_object('table', '')
+        out_html = [
+            self.build_html_object_open_tag('table', **params)
+        ]
+        fixed_columns_num = params.get('fixed_columns_num', False)
         if headers:
             columns = len(headers)
-            outputHtml += '\n\t'+self.buildHtmlObjectOpening('tr')
-            if fixedColumnsNum:
+            out_html.append('\n\t%s' % self.build_html_object_open_tag('tr'))
+            if fixed_columns_num:
                 headers_len = len(headers)
-                for header in range(0, fixedColumnsNum):
+                for header in range(0, fixed_columns_num):
                     if header < headers_len:
-                        content = str(headers[header])
+                        content = self._str(headers[header])
                     else:
                         content = '&nbsp;'
 
-                    outputHtml += self.buildHtmlObject('th', content)
+                    out_html.append(self.build_html_object('th', content))
             else:
                 for header in headers:
-                    outputHtml += self.buildHtmlObject('th', str(header))
-            outputHtml += self.buildHtmlObjectClosing('tr')
+                    out_html.append(self.build_html_object(
+                        'th', self._str(header)))
+            out_html.append(self.build_html_object_close_tag('tr'))
 
-        if fixedColumnsNum:
+        if fixed_columns_num:
             for row in cells:
-                outputHtml += '\n\t'+self.buildHtmlObjectOpening('tr')
+                out_html.append('\n\t'+self.build_html_object_open_tag('tr'))
                 row_len = len(row)
-                for column in range(0, fixedColumnsNum):
+                for column in range(0, fixed_columns_num):
                     if column < row_len:
-                        content = str(row[column])
+                        content = self._str(row[column])
                     else:
                         content = '&nbsp;'
 
-                    outputHtml += self.buildHtmlObject('td', content)
-                outputHtml += self.buildHtmlObjectClosing('tr')
+                    out_html.append(self.build_html_object('td', content))
+                out_html.append(self.build_html_object_close_tag('tr'))
         else:
             for row in cells:
-                outputHtml += '\n\t'+self.buildHtmlObjectOpening('tr')
+                tr_params = dict()
+                tds = u''
                 for column in row:
-                    outputHtml += self.buildHtmlObject('td', str(column))
-                outputHtml += self.buildHtmlObjectClosing('tr')
+                    if isinstance(column, dict):
+                        if 'tr' in column:
+                            tr_params = column['tr']
+                    else:
+                        tds += self.build_html_object(
+                            'td', self._str(column))
+                out_html.append(
+                    '\n\t%s%s%s' % (
+                        self.build_html_object_open_tag('tr', **tr_params),
+                        tds,
+                        self.build_html_object_close_tag('tr')
+                    )
+                )
 
-        outputHtml += '\n'+self.buildHtmlObjectClosing('table')
-        return outputHtml
+        out_html.append('\n%s' % self.build_html_object_close_tag('table'))
+        return ''.join(out_html)
 
-    def list(self, items=list(), listType='ul', **params):
-        ''' Item param can be string or list with tuples/lists looking like this:
-            [(item1_body, item1_options),(item2_body, item2_options)]'''
+    def list(self, items=list(), list_type='ul', **params):
+        '''
+        Item param can be string or list
+            with tuples/lists looking like this:
 
-        outputHtml = self.buildHtmlObjectOpening(listType, **params)
+            [(item1_body, item1_options),(item2_body, item2_options)]
+        '''
+        out_html = [
+            self.build_html_object_open_tag(list_type, **params),
+        ]
         for item in items:
             body = '&nbsp;'
             params = dict()
@@ -129,171 +164,288 @@ class HOP(object):
                     body = item[0]
                 if item_len > 1:
                     params = item[1]
-            elif str(item).strip() != '':
-                body = str(item)
-            outputHtml += '\n\t'+self.buildHtmlObject('li', body, **params)
-        outputHtml += '\n'+self.buildHtmlObjectClosing(listType)
-        return outputHtml
+            elif self._str(item).strip() != '':
+                body = self._str(item)
+            out_html.append('\n\t%s' % self.build_html_object(
+                'li', body, **params))
+        out_html.append('\n%s' % self.build_html_object_close_tag(list_type))
+        return out_html
 
+    def text(self, name, value='', **params):
+        return self.input(
+            name = name,
+            type = 'text',
+            value = self._str(value),
+            **params
+        )
+
+    def file(self, name, **params):
+        return self.input(
+            name = name,
+            type = 'file',
+            **params
+        )
+
+    def hidden(self, name, value='', **params):
+        return self.input(
+            name = name,
+            type = 'hidden',
+            value = self._str(value),
+            **params
+        )
+
+    def textarea(self, name, body='', **params):
+        return self.input(
+            name = name,
+            textarea = True,
+            body = body,
+            **params
+        )
+
+    def checkbox(self, name, value='', checked=False, **params):
+        return self.input(
+            name = name,
+            type = 'checkbox',
+            value = self._str(value),
+            checked = checked,
+            **params
+        )
+
+    def select(self, name, items, selected=None, **params):
+        if not isinstance(items, list):
+            raise TypeError('items must be an list')
+        if items:
+            if not isinstance(items[0], tuple):
+                temp_items = list()
+                for item in items:
+                    stringyfied_item = self._str(item)
+                    temp_items.append((stringyfied_item, stringyfied_item))
+                items = temp_items
+        return self.input(
+            name = name,
+            select = True,
+            items = items,
+            selected = selected,
+            **params
+        )
+
+    def submit(self, name, value=None, **params):
+        if not value:
+            value = name
+        return self.input(
+            name = name,
+            type = 'submit',
+            value = value,
+            **params
+        )
 
     def input(self, **params):
-        ''' special params:
+        '''
+        Creates HTML form input
+
+        special params:
+
                 'label':'Label' - creates a label for input
 
-                'textarea':True - trigger input to textarea
-                'body':str - for textarea only, textarea body'
+        special objects:
 
+                [TEXTAREA]
+                'textarea':True - trigger input to textarea
+                'body':str - textarea body
+
+                [SELECT]
                 'select':True - trigger input to select
-                'tabsize':int - for select only, increase the indent
-                'items':list - fot select only, list of select options, example:
-                    [{'body':'opt1','value':'val1'},{'body':'opt2,'value':'val2'}]
+                'selected':str - value of option that is selected by default
+                'tabsize':int - increase the indent
+                'items':list - list of select options: [(val, body), (val, body)]
         '''
-        outputHtml = ''
-        if params.has_key('label'):
-            if params.has_key('id'):
-                outputHtml += self.buildHtmlObject('label',
-                    params['label'], {'for':params['id']})
+        out_html = list()
+
+        if not 'id' in params:
+            if 'name' in params:
+                params['id'] = params['name']
             else:
-                outputHtml += self.buildHtmlObject('label', params['label'])
-            params.pop('label');
+                params['id'] = 'field_%s' % self.form_fields_num
+        if not 'name' in params:
+            params['name'] = params['id']
+
+        if params.has_key('label'):
+            out_html.append(self.build_html_object(
+                'label', params['label'], _for=params['id']))
+            params.pop('label')
 
         if params.has_key('textarea') and params['textarea']:
             body = ''
             params.pop('textarea')
+
             if params.has_key('body'):
                 body = params['body']
                 params.pop('body')
-            outputHtml += self.buildHtmlObject('textarea', body, **params)
+            out_html.append(self.build_html_object('textarea', body, **params))
+
         elif params.has_key('select') and params['select']:
             params.pop('select')
             items = False
             tabs = ''
+
             if params.has_key('items'):
                 items = params['items']
                 params.pop('items')
+
             if params.has_key('tabsize'):
                 tabs = params['tabsize'] * '\t'
                 params.pop('tabsize')
-            outputHtml += self.buildHtmlObjectOpening('select', **params)
+            out_html.append(self.build_html_object_open_tag('select', **params))
+
             if items:
-                itemNr = 0
-                for item in items:
-                    if type(item) == dict:
-                        item = dict(item)
-                        body = itemNr
-                        if item.has_key('body'):
-                            body = str(item['body'])
-                            item.pop('body')
-                        if not item.has_key('value'):
-                            item['value'] = body
-                        outputHtml += '\n\t' + tabs + self.buildHtmlObject('option', body, **item)
-                        itemNr += 1
-            outputHtml += '\n' + tabs + self.buildHtmlObjectClosing('select')
+                selected_val = self._str(params.pop('selected', items[0][0]))
+                for value, body in items:
+                    item_params = {
+                        'value':value,
+                    }
+                    if value == selected_val:
+                        item_params['selected'] = 'selected'
+                    out_html.append(
+                        u'\n\t%s%s' % (
+                            tabs,
+                            self.build_html_object(
+                                'option', body, **item_params),
+                        )
+                    )
+            out_html.append(
+                '\n%s%s' % (
+                    tabs,
+                    self.build_html_object_close_tag('select'),
+                )
+            )
         else:
             if params.has_key('body'):
                 params.pop('body')
-            if params.has_key('type') and params['type']=='hidden':
-                outputHtml += self.buildHtmlObject('div',
-                    self.buildHtmlSelfClosingObject('input', **params),
-                    style='display:none;')
+
+            if (params.has_key('type') and
+                params['type'] == 'checkbox' and
+                params.has_key('checked')):
+                chd = params['checked']
+                if chd:
+                    params['checked'] = 'checked'
+                else:
+                    params.pop('checked')
+
+            if params.has_key('type') and params['type'] == 'hidden':
+                out_html.append(self.build_html_object(
+                    'div',
+                    self.build_html_self_closing_object('input', **params),
+                    style = 'display:none;'
+                ))
             else:
-                outputHtml += self.buildHtmlSelfClosingObject('input', **params)
+                out_html.append(self.build_html_self_closing_object(
+                    'input', **params))
 
-        return outputHtml
+        self.form_fields_num += 1
+        return ''.join(out_html)
 
-    def beginForm(self, action, method='post', **params):
+    def form(self, action, method='post', multipart=False, **params):
         if not action:
             action = '/'
         if not params.has_key('accept-charset'):
             params['accept-charset'] = 'utf-8'
+        if multipart:
+            params['enctype'] = "multipart/form-data"
         params['action'] = action
         params['method'] = method
 
-        return self.buildHtmlObjectOpening('form', **params)
+        self.form_fields_num = 1
+        return self.build_html_object_open_tag('form', **params)
 
-    def endForm(self):
-        return self.buildHtmlObjectClosing('form')
+    def end_form(self):
+        self.form_fields_num = 1
+        return self.build_html_object_close_tag('form')
 
-    def autoForm(self, action, fields=[], method='post', uploadForm=False, **params):
-        ''' special params:
-                'div':False - disable wrapping inputs in divs
+    def auto_form(self, action, fields=[], method='post',
+                  upload_form=False, **params):
         '''
-        wrapInputWithDiv = True
+        special **params:
+            'div':False - disable wrapping inputs in divs
+        '''
+        wrap_input_with_div = True
         if params.has_key('div') and not params['div']:
             params.pop('div')
-            wrapInputWithDiv = False
+            wrap_input_with_div = False
 
-        if uploadForm:
-            params['enctype'] = "multipart/form-data"
-
-        formHtml = self.beginForm(action, method, **params)+'\n'
+        form_html_code = [
+            '%s\n' % self.form(action, method, upload_form, **params),
+        ]
 
         for field in fields:
-            formHtml += '\t'
             if field.has_key('select') and field['select']:
                 field['tabsize'] = 1
-            if wrapInputWithDiv:
-                formHtml += self.buildHtmlObject('div',
+            if wrap_input_with_div:
+                form_chunk = self.build_html_object('div',
                     self.input(**field), _class='input')
             else:
-                formHtml += self.input(**field)
-            formHtml += '\n'
+                form_chunk = self.input(**field)
+            form_html_code.append('\t%s\n' % form_chunk)
 
-        formHtml += self.endForm()
-        return formHtml
+        form_html_code.append(self.end_form())
+        return form_html_code
 
-    def buildHtmlObject(self, objectName, body, **params):
-        opening = self.buildHtmlObjectOpening(objectName, **params)
-        closing = self.buildHtmlObjectClosing(objectName)
-        return opening+body+closing
+    def build_html_object(self, object_name, body, **params):
+        return ''.join([
+            self.build_html_object_open_tag(object_name, **params),
+            body,
+            self.build_html_object_close_tag(object_name),
+        ])
 
-    def buildHtmlObjectOpening(self, objectName, **params):
-        objectString = '<'+self._prepareString(objectName)
-        objectString += self._buildHtmlParams(**params)
-        return objectString+'>'
+    def build_html_object_open_tag(self, object_name, **params):
+        return '<%s %s>' % (
+            self._str(object_name),
+            self._build_html_params(**params),
+        )
 
-    def buildHtmlObjectClosing(self, objectName):
-        return '</'+objectName+'>'
+    def build_html_object_close_tag(self, object_name):
+        return '</%s>' % object_name
 
-    def buildHtmlSelfClosingObject(self, objectName, **params):
-        objectString = '<'+self._prepareString(objectName)
-        objectString += self._buildHtmlParams(**params)
-        return objectString+'/>'
+    def build_html_self_closing_object(self, object_name, **params):
+        return '<%s %s />' % (
+            self._str(object_name),
+            self._build_html_params(**params),
+        )
 
     def encode(self, string):
         return string.encode('ascii', 'xmlcharrefreplace')
 
-    def _buildHtmlParams(self, **params):
-        paramsString = ''
-        for (name,value) in params.items():
-            if name.startswith('_'):
+    def _build_html_params(self, **params):
+        params_list = list()
+        for (name, value) in params.items():
+            if name[0] == '_':
                 name = name[1:]
-            name = self._prepareString(name)
-            value = self._prepareString(value)
-            paramsString += ' %s="%s"' % (name, value)
+            name = name
+            value = self._str(value)
+            params_list.append(' %s="%s"' % (name, value))
+        return ''.join(params_list)
 
-        return paramsString
-
-    def _urlValidation(self, url, specialProtocols=False):
-        url = self._prepareString(url)
-        validUrlProtocols = [
-            'http://',
-            'https://',
+    def _url_validation(self, url, special_protocols=False):
+        url = self._str(url)
+        valid_url_protocols = [
+            u'http://',
+            u'https://',
         ]
-        if specialProtocols:
-            validUrlProtocols.append('mailto:')
-            validUrlProtocols.append('skype:')
-            validUrlProtocols.append('#')
-
-        urlHasValidProtocol = False
-        for protocol in validUrlProtocols:
+        if special_protocols:
+            valid_url_protocols.extend([
+                u'mailto:',
+                u'skype:',
+                u'#',
+            ])
+        url_has_valid_protocol = False
+        for protocol in valid_url_protocols:
             if url.startswith(protocol):
-                urlHasValidProtocol = True
+                url_has_valid_protocol = True
 
-        if not urlHasValidProtocol:
-            url = self.websitePath+url
-
+        if not url_has_valid_protocol and self.website_path:
+            url = '%s%s' % (self.website_path, url)
         return url
 
-    def _prepareString(self, rawString):
-        return str(rawString).strip().strip('"')
+    def _str(self, raw_str):
+        if not isinstance(raw_str, basestring):
+            raw_str = str(raw_str)
+        return raw_str.strip().strip('"')
