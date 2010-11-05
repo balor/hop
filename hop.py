@@ -179,6 +179,13 @@ class HOP(object):
             **params
         )
 
+    def password(self, name, **params):
+        return self.input(
+            name = name,
+            type = 'password',
+            **params
+        )
+
     def file(self, name, **params):
         return self.input(
             name = name,
