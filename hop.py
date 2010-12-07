@@ -3,6 +3,8 @@
 HTML Object Helper - HOP
 Helper for rendering html objects easely
 
+Version 1.0
+
 Author: Michał Thoma
 Authors website: http://balor.pl
 '''
@@ -13,9 +15,14 @@ class HOP(object):
     website_path = ''
     form_fields_num = 0
 
-    def __init__(self, website_path=None, website_name=None):
+    def __init__(self, website_path='/', website_name=None):
+        if website_path[len(website_path)-1] != '/':
+            website_path = '%s/' % website_path
         self.website_path = website_path
         self.website_name = website_name
+
+    def url(self, url=''):
+        return self._url_validation(url)
 
     def a(self, href, body=None, title=None, **params):
         if params.has_key('validate') and params['validate'] == False:
@@ -27,9 +34,9 @@ class HOP(object):
                 params.pop('validate')
 
         if not body:
-            body = href
+            body = self.safestr(href)
         if not title:
-            title = href
+            title = self.safestr(body)
 
         params['href'] = href
         params['title'] = title
@@ -73,6 +80,9 @@ class HOP(object):
         }
         return self.build_html_self_closing_object('meta', **params)
 
+    def charset(self, charset='utf8'):
+        return self.meta_charset(charset)
+
     def title(self, title=None):
         if not title:
             if self.website_name:
@@ -87,7 +97,10 @@ class HOP(object):
         return '<!-- %s -->' % comment
 
     def table(self, cells=list(), headers=None, **params):
-        if len(cells) < 1 or type(cells[0]) != list or len(cells[0]) < 1:
+        if ((len(cells) < 1 or
+             type(cells[0]) != list or 
+             len(cells[0]) < 1
+            ) and not headers):
             return self.build_html_object('table', '')
         out_html = [
             self.build_html_object_open_tag('table', **params)
@@ -132,8 +145,12 @@ class HOP(object):
                         if 'tr' in column:
                             tr_params = column['tr']
                     else:
+                        td_params = dict()
+                        if isinstance(column, tuple):
+                            td_params = column[1]
+                            column = column[0]
                         tds += self.build_html_object(
-                            'td', self._str(column))
+                            'td', self._str(column), **td_params)
                 out_html.append(
                     '\n\t%s%s%s' % (
                         self.build_html_object_open_tag('tr', **tr_params),
@@ -169,7 +186,7 @@ class HOP(object):
             out_html.append('\n\t%s' % self.build_html_object(
                 'li', body, **params))
         out_html.append('\n%s' % self.build_html_object_close_tag(list_type))
-        return out_html
+        return ''.join(out_html)
 
     def text(self, name, value='', **params):
         return self.input(
@@ -179,10 +196,11 @@ class HOP(object):
             **params
         )
 
-    def password(self, name, **params):
+    def password(self, name, value='', **params):
         return self.input(
             name = name,
             type = 'password',
+            value = self._str(value),
             **params
         )
 
@@ -233,6 +251,16 @@ class HOP(object):
             select = True,
             items = items,
             selected = selected,
+            **params
+        )
+
+    def radio(self, name, value, checked=False, **params):
+        if checked:
+            params['checked'] = 'checked'
+        return self.input(
+            name = name,
+            value = value,
+            type = 'radio',
             **params
         )
 
@@ -404,7 +432,7 @@ class HOP(object):
         ])
 
     def build_html_object_open_tag(self, object_name, **params):
-        return '<%s %s>' % (
+        return '<%s%s>' % (
             self._str(object_name),
             self._build_html_params(**params),
         )
@@ -413,13 +441,21 @@ class HOP(object):
         return '</%s>' % object_name
 
     def build_html_self_closing_object(self, object_name, **params):
-        return '<%s %s />' % (
+        return '<%s%s />' % (
             self._str(object_name),
             self._build_html_params(**params),
         )
 
     def encode(self, string):
         return string.encode('ascii', 'xmlcharrefreplace')
+
+    def safestr(self, string):
+        return (string.
+            replace('&', '&amp;').
+            replace('"', '&quot;').
+            replace('<', '&lt;').
+            replace('>', '&gt;')
+        )
 
     def _build_html_params(self, **params):
         params_list = list()
@@ -449,6 +485,8 @@ class HOP(object):
                 url_has_valid_protocol = True
 
         if not url_has_valid_protocol and self.website_path:
+            if url and url[0] == '/':
+                url = url[1:]
             url = '%s%s' % (self.website_path, url)
         return url
 
@@ -456,3 +494,4 @@ class HOP(object):
         if not isinstance(raw_str, basestring):
             raw_str = str(raw_str)
         return raw_str.strip().strip('"')
+
