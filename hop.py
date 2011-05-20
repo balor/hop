@@ -1,15 +1,55 @@
 # -*- coding: utf-8 -*-
 '''
-HTML Object Helper - HOP
-Helper for rendering html objects easely
+HTML Object Printer, HOP in short
+Helper for rendering safe html objects with ease
 
-Version 1.0
+Version 1.1
 
 Author: Michał Thoma
 Authors website: http://balor.pl
 '''
 
 __author__ = u'Michał Thoma'
+__version__ = '1.1.0'
+
+class Literal(unicode):
+    tag = u''
+
+    def __init__(self, tag):
+        self.tag = tag
+
+    def __html__(self):
+        return self.tag
+
+    def __str__(self):
+        return self.tag
+
+def mk_literal(html):
+    return Literal(html)
+
+EMPTY = u''
+
+try:
+    from markupsafe import escape_silent as escape
+except ImportError:
+    try:
+        import markupsafe
+        def escape(s):
+            if s is None:
+                return EMPTY
+            return markupsafe.escape(s)
+    except ImportError:
+        def escape(s):
+            if s is None:
+                return EMPTY
+            if hasattr(s, '__html__'):
+                return s
+            s = s.replace('\n', '')
+            s = s.replace('\r', '')
+            s = s.replace('<', '&lt;')
+            s = s.replace('>', '&gt;')
+            s = s.replace('"', '&#34;')
+            return s
 
 class HOP(object):
     website_path = ''
@@ -35,11 +75,14 @@ class HOP(object):
 
         if not body:
             body = self.safestr(href)
-        if not title:
+        if title == None:
             title = self.safestr(body)
 
         params['href'] = href
         params['title'] = title
+
+        if title == False:
+            params.pop('title')
 
         return self.build_html_object('a', body, **params)
 
@@ -108,7 +151,7 @@ class HOP(object):
         fixed_columns_num = params.get('fixed_columns_num', False)
         if headers:
             columns = len(headers)
-            out_html.append('\n\t%s' % self.build_html_object_open_tag('tr'))
+            out_html.append(u'\n\t%s' % self.build_html_object_open_tag('tr'))
             if fixed_columns_num:
                 headers_len = len(headers)
                 for header in range(0, fixed_columns_num):
@@ -126,11 +169,11 @@ class HOP(object):
 
         if fixed_columns_num:
             for row in cells:
-                out_html.append('\n\t'+self.build_html_object_open_tag('tr'))
+                out_html.append(u'\n\t'+self.build_html_object_open_tag('tr'))
                 row_len = len(row)
                 for column in range(0, fixed_columns_num):
                     if column < row_len:
-                        content = self._str(row[column])
+                        content = row[column]
                     else:
                         content = '&nbsp;'
 
@@ -139,7 +182,7 @@ class HOP(object):
         else:
             for row in cells:
                 tr_params = dict()
-                tds = u''
+                tds = list()
                 for column in row:
                     if isinstance(column, dict):
                         if 'tr' in column:
@@ -149,18 +192,18 @@ class HOP(object):
                         if isinstance(column, tuple):
                             td_params = column[1]
                             column = column[0]
-                        tds += self.build_html_object(
-                            'td', self._str(column), **td_params)
+                        tds.append(self.build_html_object(
+                            'td', column, **td_params))
                 out_html.append(
-                    '\n\t%s%s%s' % (
+                    u'\n\t%s%s%s' % (
                         self.build_html_object_open_tag('tr', **tr_params),
-                        tds,
+                        u''.join(tds),
                         self.build_html_object_close_tag('tr')
                     )
                 )
 
-        out_html.append('\n%s' % self.build_html_object_close_tag('table'))
-        return ''.join(out_html)
+        out_html.append(u'\n%s' % self.build_html_object_close_tag('table'))
+        return mk_literal(u''.join(out_html))
 
     def list(self, items=list(), list_type='ul', **params):
         '''
@@ -227,7 +270,10 @@ class HOP(object):
             **params
         )
 
-    def checkbox(self, name, value='', checked=False, **params):
+    def checkbox(self, name, value='true', checked=False, **params):
+        if not 'id' in params:
+            params['id'] = name
+
         return self.input(
             name = name,
             type = 'checkbox',
@@ -295,12 +341,7 @@ class HOP(object):
                 'items':list - list of select options: [(val, body), (val, body)]
         '''
         out_html = list()
-
-        if not 'id' in params:
-            if 'name' in params:
-                params['id'] = params['name']
-            else:
-                params['id'] = 'field_%s' % self.form_fields_num
+        
         if not 'name' in params:
             params['name'] = params['id']
 
@@ -377,7 +418,7 @@ class HOP(object):
                     'input', **params))
 
         self.form_fields_num += 1
-        return ''.join(out_html)
+        return mk_literal(u''.join(out_html))
 
     def form(self, action, method='post', multipart=False, **params):
         if not action:
@@ -385,7 +426,7 @@ class HOP(object):
         if not params.has_key('accept-charset'):
             params['accept-charset'] = 'utf-8'
         if multipart:
-            params['enctype'] = "multipart/form-data"
+            params['enctype'] = 'multipart/form-data'
         params['action'] = action
         params['method'] = method
 
@@ -425,26 +466,26 @@ class HOP(object):
         return form_html_code
 
     def build_html_object(self, object_name, body, **params):
-        return ''.join([
+        return mk_literal(u''.join([
             self.build_html_object_open_tag(object_name, **params),
-            body,
+            escape(body),
             self.build_html_object_close_tag(object_name),
-        ])
+        ]))
 
     def build_html_object_open_tag(self, object_name, **params):
-        return '<%s%s>' % (
-            self._str(object_name),
+        return mk_literal(u'<%s%s>' % (
+            self._str(escape(object_name)),
             self._build_html_params(**params),
-        )
+        ))
 
     def build_html_object_close_tag(self, object_name):
-        return '</%s>' % object_name
+        return mk_literal(u'</%s>' % self._str(escape(object_name)))
 
     def build_html_self_closing_object(self, object_name, **params):
-        return '<%s%s />' % (
-            self._str(object_name),
+        return mk_literal(u'<%s%s />' % (
+            self._str(escape(object_name)),
             self._build_html_params(**params),
-        )
+        ))
 
     def encode(self, string):
         return string.encode('ascii', 'xmlcharrefreplace')
@@ -462,10 +503,11 @@ class HOP(object):
         for (name, value) in params.items():
             if name[0] == '_':
                 name = name[1:]
-            name = name
-            value = self._str(value)
-            params_list.append(' %s="%s"' % (name, value))
-        return ''.join(params_list)
+            params_list.append(u' %s="%s"' % (
+                escape(name), 
+                escape(value),
+            ))
+        return u''.join(params_list)
 
     def _url_validation(self, url, special_protocols=False):
         url = self._str(url)
@@ -494,4 +536,3 @@ class HOP(object):
         if not isinstance(raw_str, basestring):
             raw_str = str(raw_str)
         return raw_str.strip().strip('"')
-
