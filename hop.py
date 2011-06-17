@@ -3,14 +3,87 @@
 HTML Object Printer, HOP in short
 Helper for rendering safe html objects with ease
 
-Version 1.1
+Version 1.1.3
 
 Author: Michał Thoma
 Authors website: http://balor.pl
 '''
 
 __author__ = u'Michał Thoma'
-__version__ = '1.1.0'
+__version__ = u'1.1.3'
+
+try:
+    from markupsafe import escape_silent as escape
+except ImportError:
+    try:
+        import markupsafe
+        def escape(string):
+            if string is None:
+                return EMPTY
+            return markupsafe.escape(string)
+    except ImportError:
+        def escape(string):
+            if string is None:
+                return EMPTY
+            if hasattr(string, '__html__'):
+                return string
+            string = string.replace('\n', '')
+            string = string.replace('\r', '')
+            string = string.replace('<', '&lt;')
+            string = string.replace('>', '&gt;')
+            string = string.replace('"', '&#34;')
+            return string
+
+EMPTY = u''
+
+URL_PROTOCOLS = [
+    u'cvs://',
+    u'e2k://',
+    u'feed:',
+    u'file://',
+    u'ftp://',
+    u'git://',
+    u'go://',
+    u'gopher://',
+    u'http://',
+    u'https://',
+    u'imap://',
+    u'irc://',
+    u'ircs://',
+    u'ldap://',
+    u'nntp://',
+    u'pop://',
+    u'rmi://',
+    u'rsync://',
+    u'sftp://',
+    u'ssh://',
+    u'teamspeak://',
+]
+
+SPECIAL_URL_PROTOCOLS = [
+    u'#',
+    u'aim:',
+    u'apt:',
+    u'cid:',
+    u'dav:',
+    u'dns:',
+    u'fax:',
+    u'gg:',
+    u'gtalk:',
+    u'im:',
+    u'mailto:',
+    u'maps:',
+    u'mid:',
+    u'news:',
+    u'skype:',
+    u'tag:',
+    u'tel:',
+    u'telnet:',
+    u'view-source:',
+    u'ws:',
+    u'xmpp:',
+]
+
 
 class Literal(unicode):
     tag = u''
@@ -27,42 +100,21 @@ class Literal(unicode):
 def mk_literal(html):
     return Literal(html)
 
-EMPTY = u''
-
-try:
-    from markupsafe import escape_silent as escape
-except ImportError:
-    try:
-        import markupsafe
-        def escape(s):
-            if s is None:
-                return EMPTY
-            return markupsafe.escape(s)
-    except ImportError:
-        def escape(s):
-            if s is None:
-                return EMPTY
-            if hasattr(s, '__html__'):
-                return s
-            s = s.replace('\n', '')
-            s = s.replace('\r', '')
-            s = s.replace('<', '&lt;')
-            s = s.replace('>', '&gt;')
-            s = s.replace('"', '&#34;')
-            return s
 
 class HOP(object):
-    website_path = ''
-    form_fields_num = 0
 
     def __init__(self, website_path='/', website_name=None):
         if website_path[len(website_path)-1] != '/':
-            website_path = '%s/' % website_path
+            website_path = u'{0}/'.format(website_path)
         self.website_path = website_path
         self.website_name = website_name
+        self.form_fields_num = 0
 
     def url(self, url=''):
         return self._url_validation(url)
+
+    def link(self, href, body=None, title=None, **params):
+        return self.a(href, body, title, **params)
 
     def a(self, href, body=None, title=None, **params):
         if params.has_key('validate') and params['validate'] == False:
@@ -87,7 +139,7 @@ class HOP(object):
         return self.build_html_object('a', body, **params)
 
     def email(self, email, body=None, title=None, **params):
-        href = 'mailto:%s' % email
+        href = u'mailto:{0}'.format(email)
         return self.a(href, body, title, **params)
 
     def img(self, src, alt=None, **params):
@@ -103,23 +155,23 @@ class HOP(object):
     def style(self, href):
         href = self._url_validation(href)
         params = {
-            'href':href,
-            'rel':'stylesheet',
-            'type':'text/css',
+            'href': href,
+            'rel': 'stylesheet',
+            'type': 'text/css',
         }
         return self.build_html_self_closing_object('link', **params)
 
     def script(self, src):
         params = {
-            'src':self._url_validation(src),
-            'type':'text/javascript',
+            'src': self._url_validation(src),
+            'type': 'text/javascript',
         }
         return self.build_html_object('script', '', **params)
 
-    def meta_charset(self, charset='utf8'):
+    def meta_charset(self, charset='utf-8'):
         params = {
-            'content':'text/html; charset=%s' % charset,
-            'http-equiv':'Content-Type',
+            'content': 'text/html; charset={0}'.format(charset),
+            'http-equiv': 'Content-Type',
         }
         return self.build_html_self_closing_object('meta', **params)
 
@@ -133,11 +185,11 @@ class HOP(object):
             elif self.website_path:
                 title = self.website_path
             else:
-                title = 'My Homepage'
+                title = u'My Homepage'
         return self.build_html_object('title', title)
 
     def comment(self, comment):
-        return '<!-- %s -->' % comment
+        return u'<!-- {0} -->'.format(comment)
 
     def table(self, cells=list(), headers=None, **params):
         if ((len(cells) < 1 or
@@ -151,7 +203,8 @@ class HOP(object):
         fixed_columns_num = params.get('fixed_columns_num', False)
         if headers:
             columns = len(headers)
-            out_html.append(u'\n\t%s' % self.build_html_object_open_tag('tr'))
+            tr_obj = u'\n\t{0}'.format(self.build_html_object_open_tag('tr'))
+            out_html.append(tr_obj)
             if fixed_columns_num:
                 headers_len = len(headers)
                 for header in range(0, fixed_columns_num):
@@ -169,7 +222,9 @@ class HOP(object):
 
         if fixed_columns_num:
             for row in cells:
-                out_html.append(u'\n\t'+self.build_html_object_open_tag('tr'))
+                tr_obj = u'\n\t{0}'.format(
+                    self.build_html_object_open_tag('tr'))
+                out_html.append(tr_obj)
                 row_len = len(row)
                 for column in range(0, fixed_columns_num):
                     if column < row_len:
@@ -285,13 +340,6 @@ class HOP(object):
     def select(self, name, items, selected=None, **params):
         if not isinstance(items, list):
             raise TypeError('items must be an list')
-        if items:
-            if not isinstance(items[0], tuple):
-                temp_items = list()
-                for item in items:
-                    stringyfied_item = self._str(item)
-                    temp_items.append((stringyfied_item, stringyfied_item))
-                items = temp_items
         return self.input(
             name = name,
             select = True,
@@ -342,15 +390,34 @@ class HOP(object):
         '''
         out_html = list()
         
-        if not 'name' in params:
+        if not 'name' in params and 'id' in params:
             params['name'] = params['id']
+        elif not 'id' in params and 'name' in params:
+            params['id'] = params['name']
 
-        if params.has_key('label'):
+        if params.get('label'):
+            if params['label'] == True:
+                params['label'] = '{0}:'.format(
+                    str(params.get('name')).capitalize())
             out_html.append(self.build_html_object(
                 'label', params['label'], _for=params['id']))
             params.pop('label')
 
-        if params.has_key('textarea') and params['textarea']:
+        is_a_select_field = False
+        if params.get('type') == 'select' or params.get('select') == True:
+            is_a_select_field = True
+
+        is_a_textarea_field = False
+        if params.get('type') == 'textarea' or params.get('textarea') == True:
+            is_a_textarea_field = True
+
+        if is_a_textarea_field or is_a_select_field:
+            if 'select' in params:
+                params.pop('select')
+            if 'type' in params:
+                params.pop('type')
+
+        if is_a_textarea_field:
             body = ''
             params.pop('textarea')
 
@@ -359,8 +426,7 @@ class HOP(object):
                 params.pop('body')
             out_html.append(self.build_html_object('textarea', body, **params))
 
-        elif params.has_key('select') and params['select']:
-            params.pop('select')
+        elif is_a_select_field:
             items = False
             tabs = ''
 
@@ -374,6 +440,13 @@ class HOP(object):
             out_html.append(self.build_html_object_open_tag('select', **params))
 
             if items:
+                if not isinstance(items[0], tuple):
+                    temp_items = list()
+                    for item in items:
+                        stringyfied_item = self._str(item)
+                        temp_items.append((stringyfied_item, stringyfied_item))
+                    items = temp_items
+
                 selected_val = self._str(params.pop('selected', items[0][0]))
                 for value, body in items:
                     item_params = {
@@ -382,14 +455,14 @@ class HOP(object):
                     if value == selected_val:
                         item_params['selected'] = 'selected'
                     out_html.append(
-                        u'\n\t%s%s' % (
+                        u'\n\t{0}{1}'.format(
                             tabs,
                             self.build_html_object(
                                 'option', body, **item_params),
                         )
                     )
             out_html.append(
-                '\n%s%s' % (
+                u'\n{0}{1}'.format(
                     tabs,
                     self.build_html_object_close_tag('select'),
                 )
@@ -449,21 +522,35 @@ class HOP(object):
             wrap_input_with_div = False
 
         form_html_code = [
-            '%s\n' % self.form(action, method, upload_form, **params),
+            u'{0}\n'.format(self.form(action, method, upload_form, **params)),
         ]
 
         for field in fields:
-            if field.has_key('select') and field['select']:
+            if field.get('select'):
                 field['tabsize'] = 1
+
+            if not 'type' in field:
+                field['type'] = 'text'
+
+            div_attrs = dict()
+            if 'div_attrs' in field:
+                div_attrs = field.pop('div_attrs')
+
+            if 'class' in div_attrs:
+                div_attrs['_class'] = div_attrs.pop('class')
+
+            div_attrs['_class'] = '{0} input_field {1}_input_field'.format(
+                    div_attrs.get('_class', ''), field['type'])
+            
             if wrap_input_with_div:
                 form_chunk = self.build_html_object('div',
-                    self.input(**field), _class='input')
+                    self.input(**field), **div_attrs)
             else:
                 form_chunk = self.input(**field)
-            form_html_code.append('\t%s\n' % form_chunk)
+            form_html_code.append(u'\t{0}\n'.format(form_chunk))
 
         form_html_code.append(self.end_form())
-        return form_html_code
+        return u''.join(form_html_code)
 
     def build_html_object(self, object_name, body, **params):
         return mk_literal(u''.join([
@@ -479,10 +566,10 @@ class HOP(object):
         ))
 
     def build_html_object_close_tag(self, object_name):
-        return mk_literal(u'</%s>' % self._str(escape(object_name)))
+        return mk_literal(u'</{0}>'.format(self._str(escape(object_name))))
 
     def build_html_self_closing_object(self, object_name, **params):
-        return mk_literal(u'<%s%s />' % (
+        return mk_literal(u'<{0}{1} />'.format(
             self._str(escape(object_name)),
             self._build_html_params(**params),
         ))
@@ -503,7 +590,7 @@ class HOP(object):
         for (name, value) in params.items():
             if name[0] == '_':
                 name = name[1:]
-            params_list.append(u' %s="%s"' % (
+            params_list.append(u' {0}="{1}"'.format(
                 escape(name), 
                 escape(value),
             ))
@@ -511,16 +598,9 @@ class HOP(object):
 
     def _url_validation(self, url, special_protocols=False):
         url = self._str(url)
-        valid_url_protocols = [
-            u'http://',
-            u'https://',
-        ]
+        valid_url_protocols = URL_PROTOCOLS
         if special_protocols:
-            valid_url_protocols.extend([
-                u'mailto:',
-                u'skype:',
-                u'#',
-            ])
+            valid_url_protocols.extend(SPECIAL_URL_PROTOCOLS)
         url_has_valid_protocol = False
         for protocol in valid_url_protocols:
             if url.startswith(protocol):
@@ -529,7 +609,7 @@ class HOP(object):
         if not url_has_valid_protocol and self.website_path:
             if url and url[0] == '/':
                 url = url[1:]
-            url = '%s%s' % (self.website_path, url)
+            url = u'{0}{1}'.format(self.website_path, url)
         return url
 
     def _str(self, raw_str):
