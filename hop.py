@@ -430,13 +430,14 @@ class HOP(object):
             items = False
             tabs = ''
 
-            if params.has_key('items'):
+            if 'items' in params:
                 items = params['items']
                 params.pop('items')
 
-            if params.has_key('tabsize'):
-                tabs = params['tabsize'] * '\t'
+            if 'tabsize' in params:
+                tabs = params['tabsize'] * u'\t'
                 params.pop('tabsize')
+
             out_html.append(self.build_html_object_open_tag('select', **params))
 
             if items:
@@ -450,10 +451,12 @@ class HOP(object):
                 selected_val = self._str(params.pop('selected', items[0][0]))
                 for value, body in items:
                     item_params = {
-                        'value':value,
+                        'value': self._str(value),
                     }
-                    if value == selected_val:
+
+                    if item_params['value'] == selected_val:
                         item_params['selected'] = 'selected'
+
                     out_html.append(
                         u'\n\t{0}{1}'.format(
                             tabs,
