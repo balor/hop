@@ -2,9 +2,9 @@
 
   HOP is a small helper class for creating html objects souch a hyperlinks, images or forms.
 
-  I've created it while rewriting some webpage from PHP (dead-simple inline scripts) to Python (Bottle + SqlAlchemy). 
-  The one thing that was missing during the development process was some html object printer. So i decided to create a small helper class, with no dependencies, not related to any framework, KISS'ish etc. Perfect to use with any simple web-framework like bottle or fpyf.
-  It works well also with frameworks like Pylons or Django (supporting thier auto-escape filters).
+  I've created it while rewriting some webpage from PHP (dead-simple inline scripts) to Python (Bottle + SQLAlchemy). 
+  The one thing that was missing during the development process was a html object printer. So i decided to create a small one, with no dependencies, not related to any framework, KISS'ish etc. Perfect to use with any web-framework, from micros like bottle or fpyf to pylons, pyramid or django.
+  HOP is actively maintained and used both in small and big commercial web applications. It's main goal is to bring easy to use html helper library that you can use in any python web projct, without worrying about compatibility or dependencies.
 
 # Installation
 
