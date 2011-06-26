@@ -221,6 +221,25 @@ class TagsTests(unittest.TestCase):
         self.assertEqual(hop.submit(u'Log me in'), html)
 
 
+    def test_table(self):
+
+        headers = [u'corp', u'market share', u'flaship product']
+        cells = [
+            [u'Microsoft', u'80%', u'Microsoft Windows'],
+            [u'Apple', u'12%', u'iPhone'],
+            [u'Oracle', u'63%', u'Oracle db'],
+        ]
+
+        html = u'<table><tr><th>corp</th><th>market share</th><th>flaship product</th></tr><tr><td>Microsoft</td><td>80%</td><td>Microsoft Windows</td></tr><tr><td>Apple</td><td>12%</td><td>iPhone</td></tr><tr><td>Oracle</td><td>63%</td><td>Oracle db</td></tr></table>'
+        self.assertEqual(hop.table(cells, headers), html)
+
+        html = u'<table><tr><th>corp</th></tr><tr><td>Microsoft</td></tr><tr><td>Apple</td></tr><tr><td>Oracle</td></tr></table>'
+        self.assertEqual(hop.fixed_col_table(cells, 1, headers), html)
+
+        html = u'<table><tr><th>corp</th><th>market share</th><th>flaship product</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th></tr><tr><td>Microsoft</td><td>80%</td><td>Microsoft Windows</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>Apple</td><td>12%</td><td>iPhone</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>'
+        self.assertEqual(hop.fixed_col_table(cells[:2], 6, headers), html)
+
+
 if __name__ == '__main__':
     unittest.main()
 
