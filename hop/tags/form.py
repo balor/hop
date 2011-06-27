@@ -10,7 +10,6 @@ from ..utils import (
     mk_literal,
     safestr, 
     sstrip,
-    validate_url,
 )
 
 
@@ -113,8 +112,9 @@ def input_field(type, name=None, value=None, **params):
     params = _set_id_and_name(name, params)
     label_obj, params = _set_label(params)
 
-    if type == 'checkbox' and params.get('checked', False):
-        params['checked'] = u'checked'
+    if type == 'checkbox' and 'checked' in params:
+        if params.pop('checked'):
+            params['checked'] = u'checked'
 
     input_obj = build_html_self_closing_object(u'input', **params)
     if type == 'hidden':
@@ -160,11 +160,13 @@ def hidden(name, value=u'', **params):
 
 
 def checkbox(name, value=u'true', checked=False, **params):
+    if checked:
+        params['checked'] = True
+
     return input_field(
         type = u'checkbox',
         name = name,
         value = sstrip(value),
-        checked = checked,
         **params
     )
 

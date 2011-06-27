@@ -15,10 +15,11 @@ from ..utils import (
 
 
 def a(href, body=None, title=None, **params):
-    if not 'skip_validation' in params:
+    if 'validate_url' in params:
+        params.pop('validate_url')
         href = validate_url(href, special_protocols=True)
     else:
-        params.pop('skip_validation')
+        href = sstrip(href)
 
     if not body:
         body = safestr(href)
@@ -35,7 +36,12 @@ def a(href, body=None, title=None, **params):
 
 
 def img(src, alt=None, **params):
-    params['src'] = sstrip(src)
+    if 'validate_url' in params:
+        params.pop('validate_url')
+        params['src'] = validate_url(src, special_protocols=True)
+    else:
+        params['src'] = sstrip(src)
+
     if alt:
         params['alt'] = alt
     else:
@@ -43,21 +49,32 @@ def img(src, alt=None, **params):
     return build_html_self_closing_object(u'img', **params)
 
 
-def style(href):
-    href = validate_url(href)
-    params = {
+def style(href, **params):
+    if 'validate_url' in params:
+        params.pop('validate_url')
+        href = validate_url(href, special_protocols=True)
+    else:
+        href = sstrip(href)
+
+    params.update({
         'href': href,
         'rel': u'stylesheet',
         'type': u'text/css',
-    }
+    })
     return build_html_self_closing_object(u'link', **params)
 
 
-def script(src):
-    params = {
-        'src': validate_url(src),
+def script(src, **params):
+    if 'validate_url' in params:
+        params.pop('validate_url')
+        src = validate_url(src, special_protocols=True)
+    else:
+        src = sstrip(src)
+
+    params.update({
+        'src': src,
         'type': u'text/javascript',
-    }
+    })
     return build_html_object(u'script', u'', **params)
 
 

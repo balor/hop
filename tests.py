@@ -23,6 +23,12 @@ class TagsTests(unittest.TestCase):
 
         html = u'<a title="balor website" style="color:red;" href="http://balor.pl" id="ganja" class="myLink">BALOR</a>'
         self.assertEqual(hop.a(u'http://balor.pl', u'BALOR', u'balor website', _class=u'myLink', id=u'ganja', style=u'color:red;'), html)
+        
+        html = u'<a href="http://balor.pl" title="http://balor.pl">http://balor.pl</a>'
+        self.assertEqual(hop.a(u'balor.pl', validate_url=True), html)
+
+
+    def test_email_alias(self):
 
         html = u'<a href="mailto:fake@balor.pl" title="Mail to fake@balor.pl">fake@balor.pl</a>'
         self.assertEqual(hop.email(u'fake@balor.pl'), html)
@@ -41,6 +47,18 @@ class TagsTests(unittest.TestCase):
 
         html = u'<img src="/picture.png" alt="My picture" class="thePicture" />'
         self.assertEqual(hop.img(u'/picture.png', alt=u'My picture', _class=u'thePicture'), html)
+
+
+    def test_script_tag(self):
+
+        html = u'<script src="/jquery.js" type="text/javascript"></script>'
+        self.assertEqual(hop.script(u'/jquery.js'), html)
+
+        html = u'<script src="http://balor.pl/jquery.js" type="text/javascript"></script>'
+        self.assertEqual(hop.script(u'http://balor.pl/jquery.js', validate_url=True), html)
+
+        html = u'<script src="http://balor.pl/jquery.js" type="text/javascript"></script>'
+        self.assertEqual(hop.script(u'balor.pl/jquery.js', validate_url=True), html)
 
 
     def test_style_tag(self):
@@ -198,6 +216,9 @@ class TagsTests(unittest.TestCase):
 
 
     def test_checkbox_field_tag(self):
+
+        html = u'<input type="checkbox" name="remember_me" value="true" id="remember_me" />'
+        self.assertEqual(hop.checkbox(u'remember_me'), html)
 
         html = u'<input type="checkbox" checked="checked" name="remember_me" value="true" id="remember_me" />'
         self.assertEqual(hop.checkbox(u'remember_me', checked=True), html)

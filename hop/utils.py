@@ -125,8 +125,8 @@ def validate_url(url, special_protocols=False, base_path=None):
     if url_has_valid_protocol:
         return url
 
+    url = url[1:] if url and url[0] == '/' else url
     if base_path:
-        url = url[1:] if url and url[0] == '/' else url
         base_path = base_path[:-1] if base_path[-1] == '/'  else base_path
         url = u'{0}{1}'.format(base_path, url)
     else:
