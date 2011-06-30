@@ -4,13 +4,13 @@ import os
 from distutils.core import setup
 
 if sys.version_info < (2,6):
-    raise NotImplementedError(u'You need Python 2.6 or higher to use HOP.')
+    raise NotImplementedError(u'You need Python 2.6 or higher to use hop.')
 
 from hop import __version__, __author__, __website__
 
 
 setup(
-    name = 'HOP',
+    name = 'hop',
     version = str(__version__),
     description = (
         u'HTML Object Printer - simple web helpers without dependencies.'
