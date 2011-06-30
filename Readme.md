@@ -8,42 +8,57 @@
 
 # Installation
 
-  Just add the `hop.py` file to your project and use it!
+  `$ easy_install hop`
+
+  or
+
+  `$ pip install hop
+
+# Documentation
+
+  For now see `tests.py` for a helpers usage.
 
 # Example
 
-  Import HOP and create new instance which will be passed to views:
-
-    from hop import HOP
-
-    hop = HOP(website_name=u'MySite.com')
+  Import hop.tags for direct access to all tags printers:
+    
+    import hop.tags as h
 
   then use it in views (for example Mako):
 
     <html>
         <head>
-            ${hop.title()}
-            ${hop.charset()}
-            ${hop.script(u'/javascripts/jquery.js'}}
-            ${hop.style(u'/style.css'}}
+            ${h.title(u'My website')}
+            ${h.charset()}
+            ${h.script(u'/javascripts/jquery.js'}}
+            ${h.style(u'/style.css'}}
         </head>
         <body>
-            <p>${hop.a(u'/albums', u'My albums')}</p>
-            <p>${hop.emial(u'my@email.com', u'Mail me!')}</p>
+            <p>${h.a(u'/albums', u'My albums')}</p>
+            <p>${h.email(u'my@email.com', u'Mail me!')}</p>
             <div class="form">
-                ${hop.form(u'/handle/form', multipart=True)}
-                    <p>${hop.text(u'username')}</p>
-                    <p>${hop.password(u'password')}</p>
-                    <p>${hop.checkbox(u'remember_me', checked=True)}</p>
-                    <p>${hop.submit(u'Submit')}</p>
-                ${hop.end_form()}
+                ${h.form(u'/handle/form', multipart=True)}
+                    <p>${h.text(u'username')}</p>
+                    <p>${h.password(u'password')}</p>
+                    <p>${h.file(u'my_file')}</p>
+                    <p>${h.checkbox(u'remember_me', checked=True)}</p>
+                    <p>${h.submit(u'Submit')}</p>
+                ${h.end_form()}
             </div>
             <p>
                 <h2>I like:</h2>
-                ${hop.list([u'banana', u'apple', u'juice'])}
+                ${h.ul([u'banana', u'apple', u'juice'])}
             </p>
         </body>
     </html>
+
+# To-do
+
+  * Create site-dedicated helper class for even more automatization
+  * Create declarative form helper base class and form fields classes
+  * More tests
+  * More examples!
+  * DOCS!
 
 # License
 

@@ -2,7 +2,7 @@
 
 import tags
 
-#TODO: whole module!
+#TODO: write this helper...
 
 class Helper(object):
 
