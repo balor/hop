@@ -6,19 +6,19 @@ from distutils.core import setup
 if sys.version_info < (2,6):
     raise NotImplementedError(u'You need Python 2.6 or higher to use HOP.')
 
-import hop
+from hop import __version__, __author__, __website__
 
 
 setup(
     name = 'HOP',
-    version = hop.__version__,
+    version = str(__version__),
     description = (
         u'HTML Object Printer - simple web helpers without dependencies.'
     ),
-    author = u'Michał Thoma',
+    author = __author__,
     author_email = 'michal@balor.pl',
-    licence = 'MIT',
+    license = 'MIT',
     packages = ['hop', 'hop.tags'],
     platforms = ['any'],
-    url = 'https://github.com/balor/hop',
+    url = str(__website__),
 )
