@@ -36,6 +36,7 @@
                     <p>${h.text(u'username')}</p>
                     <p>${h.password(u'password')}</p>
                     <p>${h.file(u'my_file')}</p>
+                    <p>${h.radio_list(u'fav_movie', [u'matrix', u'casablanca', u'jasminum'])}</p>
                     <p>${h.checkbox(u'remember_me', checked=True)}</p>
                     <p>${h.submit(u'Submit')}</p>
                 ${h.end_form()}
