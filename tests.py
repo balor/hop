@@ -235,6 +235,19 @@ class TagsTests(unittest.TestCase):
         html = u'<label for="use_power">use_power</label><input type="radio" id="use_power" value="1" name="use_power" />'
         self.assertEqual(hop.radio(u'use_power', 1, label=True), html)
 
+        html = u'<label for="use_power">use_power</label><input checked="checked" type="radio" name="use_power" value="1" id="use_power" />'
+        self.assertEqual(hop.radio(u'use_power', 1, True, label=True), html)
+
+        html = u'<label><input type="radio" name="use_power" value="1" id="use_power" />1</label><label><input type="radio" name="use_power" value="2" id="use_power" />2</label><label><input type="radio" checked="checked" name="use_power" value="3" id="use_power" />3</label>'
+        self.assertEqual(hop.radio_list(u'use_power', [1,2,3], 3), html)
+
+        html = u'<label><input type="radio" name="fav_movie" value="one" id="fav_movie" />Matrix</label><label><input type="radio" name="fav_movie" value="two" id="fav_movie" />Star Wars</label><label><input type="radio" name="fav_movie" value="three" id="fav_movie" />Pulp Fiction</label>'
+        self.assertEqual(hop.radio_list(u'fav_movie', [
+            [u'one', u'Matrix'],
+            [u'two', u'Star Wars'],
+            [u'three', u'Pulp Fiction'],
+        ], 2), html)
+
 
     def test_submit_field_tag(self):
 

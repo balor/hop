@@ -112,7 +112,7 @@ def input_field(type, name=None, value=None, **params):
     params = _set_id_and_name(name, params)
     label_obj, params = _set_label(params)
 
-    if type == 'checkbox' and 'checked' in params:
+    if type in ['radio', 'checkbox'] and 'checked' in params:
         if params.pop('checked'):
             params['checked'] = u'checked'
 
@@ -172,12 +172,47 @@ def checkbox(name, value=u'true', checked=False, **params):
 
 
 def radio(name, value=u'', checked=False, **params):
+    if checked:
+        params['checked'] = True
+
     return input_field(
         type = u'radio',
         name = name,
         value = value,
         **params
     )
+
+
+def radio_list(name, values, value_checked=None, **params):
+    '''
+    Prints the list of radio buttons
+
+    name - name for the buttons
+    values - can be list or dict:
+        
+        ['val_0', 'val_1', 'val_2']
+
+        {
+            'val_0': u'Label zero',
+            'val_1': u'Label one',
+            'val_2': u'Label two',
+        }
+    '''
+    html = list()
+    def make_list_item(val, label_str=None):
+        label_str = label_str if label_str else val
+        field = u'{0}{1}'.format(
+            radio(name, val, val==value_checked, **params), label_str) 
+        return label(mk_literal(field))
+
+    for value in values:
+        if isinstance(value, list):
+            value, label_str = value[0], value[1]
+        else:
+            label_str = value
+        html.append(make_list_item(value, label_str))
+
+    return mk_literal(u''.join(html))
 
 
 def submit(name, value=None, **params):
