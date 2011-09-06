@@ -6,5 +6,5 @@ Helper for rendering safe html objects with ease.
 
 __author__ = u'Michał Thoma'
 __author_website__ = u'http://balor.pl'
-__version__ = u'1.5.1'
+__version__ = u'1.5.2'
 __website__ = u'https://github.com/balor/hop'

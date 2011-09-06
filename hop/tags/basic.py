@@ -94,6 +94,12 @@ def comment(comment):
     return mk_literal(u'<!-- {0} -->'.format(comment))
 
 
+def button(body=u'', **params):
+    if not 'type' in params:
+        params['type'] = u'button'
+    return build_html_object(u'button', body, **params)
+
+
 def html_list(items=list(), list_type='ul', **params):
     '''
     Item param can be string or list

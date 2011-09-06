@@ -85,6 +85,15 @@ class TagsTests(unittest.TestCase):
         self.assertEqual(hop.comment(u'rage age'), html)
 
 
+    def test_button_tag(self):
+
+        html = u'<button type="button"></button>'
+        self.assertEqual(hop.button(), html)
+
+        html = u'<button type="button">Click Me!</button>'
+        self.assertEqual(hop.button(u'Click Me!'), html)
+
+
     def test_list_tag(self):
 
         data = [
@@ -253,6 +262,9 @@ class TagsTests(unittest.TestCase):
 
         html = u'<input type="submit" name="Log me in" value="Log me in" id="Log me in" />'
         self.assertEqual(hop.submit(u'Log me in'), html)
+
+        html = u'<input type="submit" value="" />'
+        self.assertEqual(hop.submit(), html)
 
 
     def test_table(self):

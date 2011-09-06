@@ -215,9 +215,10 @@ def radio_list(name, values, value_checked=None, **params):
     return mk_literal(u''.join(html))
 
 
-def submit(name, value=None, **params):
-    if not value:
-        value = name
+def submit(name=None, value=None, **params):
+    name = value if name == None else name
+    value = name if value == None else value
+
     return input_field(
         type = u'submit',
         name = name,
